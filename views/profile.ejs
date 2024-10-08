@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-gray-50 min-h-screen flex flex-col items-center justify-center">
+    <!-- Logout button -->
+    <div class="absolute top-4 right-4">
+      <a href="/logout"
+        type="submit"
+        class="py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+      >
+        Logout
+      </a>
+    </div>
+
+    <!-- Main form container -->
+    <div class="w-full max-w-md bg-white p-8 rounded-lg shadow-md">
+      <div class="mb-6 text-center">
+        <h2 class="text-3xl font-extrabold text-gray-900">
+          Hello <%= user.name %>
+        </h2>
+        <p class="mt-2 text-sm text-gray-600">
+          You can create a post below
+        </p>
+      </div>
+
+      <!-- Form -->
+      <form action="" class="space-y-6">
+        <div class="rounded-md shadow-sm">
+          <textarea
+            class="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm resize-none"
+            placeholder="Write what you like"
+            name="postContent"
+            id="postContent"
+            rows="4"
+          ></textarea>
+        </div>
+
+        <div>
+          <button
+            type="submit"
+            class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          >
+            Post
+          </button>
+        </div>
+      </form>
+      <!-- Post container -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Post 1 -->
+          <div class="p-4 bg-white rounded-lg shadow-md">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-2">
+                <!-- <img
+                  class="w-10 h-10 rounded-full"
+                  src="https://example.com/user1.jpg"
+                  alt="User 1"
+                /> -->
+                <div class="text-sm text-gray-600"><%= user.name %></div>
+              </div>
+
+            </div>
+            <div class="mt-4 text-gray-700">
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vel
+              consectetur dolor.    
+              </div>
+            
+    </div>
+  </body>
+</html>

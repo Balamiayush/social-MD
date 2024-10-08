@@ -3,11 +3,15 @@ const express = require("express");
 const app = express();
 const path = require("path");
 const User = require("./models/user");
+const PostModel = require("./models/user");
+
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const Post = require("./models/post");
+
 app.set("view engine", "ejs");
 const port = 3000;
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -16,13 +20,8 @@ app.get("/", (req, res) => {
   res.render("index");
 });
 
-app.get("/login", async (req, res) => {
+app.get("/login", (req, res) => {
   res.render("login");
-});
-
-// Protecting post route with isLoggedIn middleware
-app.get("/post", isLoggedIn, (req, res) => {
-  res.render("login", { user: req.user });
 });
 
 app.post("/register", async (req, res) => {
@@ -31,6 +30,7 @@ app.post("/register", async (req, res) => {
   if (user) {
     return res.status(400).send("User already exists");
   }
+
   bcrypt.genSalt(10, (err, salt) => {
     if (err) {
       return res.status(500).send("Error generating salt");
@@ -59,7 +59,6 @@ app.post("/login", async (req, res) => {
   }
   bcrypt.compare(password, user.password, (err, isMatch) => {
     if (isMatch) {
-      // Generate JWT token and store it in a cookie
       let token = jwt.sign({ email: email, userid: user._id }, "ayush");
       res.cookie("token", token);
       return res.redirect("/profile");
@@ -76,7 +75,7 @@ app.get("/logout", (req, res) => {
 
 function isLoggedIn(req, res, next) {
   const token = req.cookies.token;
-  if (!token) return res.send("You must be logged in");
+  if (!token) return res.redirect("/login");
   try {
     let data = jwt.verify(token, "ayush");
     req.user = data;
@@ -87,14 +86,77 @@ function isLoggedIn(req, res, next) {
 }
 
 app.get("/profile", isLoggedIn, async (req, res) => {
-  let user = await User.findOne({ email: req.user.email });
-  res.render("profile", { user: user });
-  // Get user's posts
-  let {content} = req.body;
-  let post = await Post.find({ user: user._id,content });
-  user.posts.push(post._id);
-  await user.save();
-  res.render("profile", { user: user, posts: post });
+  try {
+    let user = await User.findOne({ email: req.user.email });
+    if (!user) {
+      return res.status(404).send("User not found");
+    }
+
+    // Get the user's posts
+    let posts = await Post.find({ user: user._id });
+    user.populate("posts", { user });
+
+    res.render("profile", { user: user, posts: posts });
+  } catch (err) {
+    res.status(500).send("Error fetching profile");
+  }
+});
+app.post("/post", isLoggedIn, async (req, res) => {
+  try {
+    const { postContent } = req.body;
+    const user = await User.findOne({ email: req.user.email });
+
+    if (!user) {
+      return res.status(404).send("User not found");
+    }
+
+    // Create a new post
+    const post = await Post.create({
+      content: postContent,
+      user: user._id,
+    });
+
+    // Optionally, add the post to the user's posts array
+    user.posts.push(post._id);
+    await user.save();
+
+    res.redirect("/profile");
+  } catch (error) {
+    console.error("Error creating post:", error);
+    res.status(500).send("Server error");
+  }
+});
+app.get("/like/:id", isLoggedIn, async (req, res) => {
+  try {
+    let post = await Post.findOne({ _id: req.params.id }).populate("user");
+
+    if (!post) {
+      return res.status(404).send("Post not found");
+    }
+
+    // Toggle like/unlike
+    if (post.likes.indexOf(req.user.userid) === -1) {
+      // Like the post
+      post.likes.push(req.user.userid);
+    } else {
+      // Unlike the post
+      post.likes.splice(post.likes.indexOf(req.user.userid), 1);
+    }
+
+    await post.save();
+    res.redirect("/profile");
+  } catch (error) {
+    console.error("Error toggling like:", error);
+    res.status(500).send("Server error");
+  }
+});
+app.get("/edit/:id", isLoggedIn, async (req, res) => {
+  let post = await Post.findOne({ _id: req.params.id }).populate("user");
+  res.render("edit",{post:post});
+});
+app.post("/update/:id", isLoggedIn, async (req, res) => {
+  let post = await Post.findOneAndUpdate({ _id: req.params.id },{content:req.body.content});
+  res.redirect("/profile");
 });
 
 app.listen(port, () => {

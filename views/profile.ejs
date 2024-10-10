@@ -17,16 +17,29 @@
       >
         Logout
       </a>
+      <a
+        href="/uploadImg"
+        class="py-2 ml-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+      >
+        Upload img
+      </a>
     </div>
 
     <!-- Main form container -->
     <div class="w-full max-w-md bg-white p-8 rounded-lg shadow-md">
-      <div class="mb-6 text-center">
+      <div class="mb-6 text-center flex  items-center   gap-2 ">
+        <div class="w-12 h-12  rounded-full overflow-hidden">
+          <img
+            src="/uploads/<%= user.imageUrl %>"
+            alt="Profile Image"
+            class=" w-full h-full rounded-full object-cover"
+          />
+        </div>
         <h2 class="text-3xl font-extrabold text-gray-900">
           Hello <%= user.name %>
         </h2>
-        <p class="mt-2 text-sm text-gray-600">You can create a post below</p>
       </div>
+      <p class="mt-2 text-sm text-gray-600">You can create a post below</p>
 
       <!-- Form -->
       <form action="/post" method="POST" class="space-y-6">
@@ -61,19 +74,15 @@
           </div>
           <div class="mt-4 text-gray-700"><%= post.content %></div>
           <div class="btns flex gap-4 mt-5">
-            <a href="/like/<%= post._id %>" class="text-blue-500"><span class="text-black p-2">
-              <%= post.likes.length %>
-            </span>
-            <%= post.likes.indexOf(user._id)===-1?'like':"unlike" %>
-          </a>
+            <a href="/like/<%= post._id %>" class="text-blue-500">
+              <span class="text-black p-2"> <%= post.likes.length %> </span>
+              <%= post.likes.indexOf(user._id) === -1 ? 'like' : 'unlike' %>
+            </a>
             <a href="/edit/<%= post._id %>" class="text-blue-500">edit</a>
           </div>
         </div>
-        
         <% }) %>
-
       </div>
-
     </div>
   </body>
 </html>
